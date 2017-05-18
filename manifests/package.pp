@@ -35,6 +35,9 @@
 # [*deployment_root*]
 # The network location where the office installation media is stored
 #
+# [*deployment_root_absolute*]
+# Whether the path to deployment_root is absolute (false by default)
+#
 # === Examples
 #
 #  To install Word and Excel packages from Office 2010 SP1:
@@ -60,6 +63,7 @@ define msoffice::package(
   $deployment_root = '',
   $company_name = '',
   $user_name = '',
+  $deployment_root_absolute = false,
 ) {
 
   include ::msoffice::params
@@ -79,16 +83,22 @@ define msoffice::package(
   validate_array($products)
   validate_re($sp,'^[0-3]$', 'The service pack specified does not match 0-3')
 
+  validate_bool($deployment_root_absolute)
+
   $office_num = $msoffice::params::office_versions[$version]['version']
   $office_product = $msoffice::params::office_versions[$version]['editions'][$edition]['office_product']
   $product_key = $msoffice::params::office_versions[$version]['prod_key']
   $office_reg_key = "HKLM:\\SOFTWARE\\Microsoft\\Office\\${office_num}.0\\Common\\ProductVersion"
   $office_build = $msoffice::params::office_versions[$version]['service_packs'][$sp]['build']
 
-  if $version == '2010' {
-    $office_root = "${deployment_root}\\OFFICE${office_num}\\${edition}\\${arch}"
+  if ($deployment_root_absolute) {
+    $office_root = "${deployment_root}"
   } else {
-    $office_root = "${deployment_root}\\OFFICE${office_num}\\${edition}"
+    if $version == '2010' {
+      $office_root = "${deployment_root}\\OFFICE${office_num}\\${edition}\\${arch}"
+    } else {
+      $office_root = "${deployment_root}\\OFFICE${office_num}\\${edition}"
+    }
   }
 
   if $ensure == 'present' {

@@ -40,6 +40,9 @@
 # [*deployment_root*]
 # The network location where the office installation media is stored
 #
+# [*deployment_root_absolute*]
+# Whether the path to deployment_root is absolute (false by default)
+#
 # === Examples
 #
 #  To install Word and Excel packages from Office 2010 SP1:
@@ -62,7 +65,8 @@ define msoffice(
   $arch = 'x86',
   $products = [],
   $lang_code = 'en-us',
-  $ensure = 'present'
+  $ensure = 'present',
+  $deployment_root_absolute = false,
 ) {
 
   include ::msoffice::params
@@ -82,24 +86,28 @@ define msoffice(
 
   validate_re($ensure,'^(present|absent)$', 'The ensure argument does not match present or absent')
 
+  validate_bool($deployment_root_absolute)
+
   msoffice::package { "microsoft office ${version}":
-    ensure          => $ensure,
-    version         => $version,
-    edition         => $edition,
-    license_key     => $license_key,
-    arch            => $arch,
-    lang_code       => $lang_code,
-    products        => $products,
-    sp              => $sp,
-    deployment_root => $deployment_root,
+    ensure                   => $ensure,
+    version                  => $version,
+    edition                  => $edition,
+    license_key              => $license_key,
+    arch                     => $arch,
+    lang_code                => $lang_code,
+    products                 => $products,
+    sp                       => $sp,
+    deployment_root          => $deployment_root,
+    deployment_root_absolute => $deployment_root_absolute,
   }
 
   if $ensure == 'present' {
     msoffice::servicepack { "microsoft office ${version} servicepack ${sp}":
-      version         => $version,
-      sp              => $sp,
-      arch            => $arch,
-      deployment_root => $deployment_root,
+      version                  => $version,
+      sp                       => $sp,
+      arch                     => $arch,
+      deployment_root          => $deployment_root,
+      deployment_root_absolute => $deployment_root_absolute,
     }
 
     msoffice::lip { "microsoft lip ${lang_code}":
