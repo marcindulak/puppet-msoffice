@@ -35,7 +35,7 @@ describe 'msoffice::servicepack', type: :define do
 
     it do
       expect { is_expected.to contain_exec('install-sp') }.
-        to raise_error(Puppet::Error, %r{The service pack specified not supported})
+        to raise_error(Puppet::Error, %r{The service pack specified does not match 0-3})
     end
   end
 
